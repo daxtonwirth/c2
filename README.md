@@ -10,7 +10,7 @@ The server software has 6 options: run a command on the client and receive the o
 
 Here is my YouTube demonstration of the software and a walkthrough of the code:
 
-[Software Demo Video](http://youtube.link.goes.here)
+[Software Demo Video](https://youtu.be/JveHtE4GKAc)
 
 # Network Communication
 
