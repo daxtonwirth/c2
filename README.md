@@ -1,4 +1,4 @@
-# Overview
+# C2 Project Overview
 
 The main reason I am writing this is to learn more about how C2 servers work on a fundamental level, so I figured the best way to do this would be to create one! I also want to learn and understand TCP sockets and the libraries needed to do this which will help me in future projects. 
 
@@ -29,10 +29,11 @@ For the server, I based the code off of the socketserver library which makes it 
 
 ## Useful Websites I used for this project
 
+* [Python Server Libraries](https://docs.python.org/3.6/library/socketserver.html)
+* [Python Socket Libraries](https://docs.python.org/3.6/library/socket.html)
 * [Encrypt and Decrypt Files using Python](https://www.geeksforgeeks.org/encrypt-and-decrypt-files-using-python/)
-* [Web Site Name](http://url.link.goes.here)
 
-# Future Work
+## Future Work
 
 * Ability to change encoding methods or use encryption for all communication
 * Make the traffic appear as http or dns to appear legitimate
