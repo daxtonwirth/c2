@@ -22,6 +22,9 @@ I used TCP for this project and allowed the user to choose which port numbers th
 
 # Development Environment
 
+## Requirements:
+- cryptography
+
 {Describe the tools that you used to develop the software}
 
 {Describe the programming language that you used and any libraries.}
